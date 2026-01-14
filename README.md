@@ -1,3 +1,13 @@
+# weew12 >>>
+
+> this repo is forked from github faas official repo branch HEAD: 1d211f9c00323a673fe3f9d6094741d4fb251bff
+
+## 备注
+
+**可以通过 `git` 提交记录信息查看基于原始版本所做的修改内容以及每次修改的地方**
+
+# weew12 <<<
+
 ## OpenFaaS &reg; - Serverless Functions Made Simple
 
 [![Build Status](https://github.com/openfaas/faas/actions/workflows/build.yml/badge.svg)](https://github.com/openfaas/faas/actions/workflows/build.yml)
