@@ -50,8 +50,19 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	e.metricOptions.GatewayFunctionInvocationStarted.Describe(ch)
 }
 
+// 给 Prometheus 收集数据
+// Collect函数就是给Prometheus收集数据，这里面的 ServiceReplicasGauge 是计算的每个函数副本数，
+// 它所在的循环会遍历所有存在的函数，所以新建的函数也能统计到
+//
+// Prometheus提供了一个通过值获取指标的函数，即用 GetMetricWithLabelValues 获取一下每个函数的指标，如果不存在就会自己新建一个初始的，
+// 这样给 GatewayFunctionInvocation 获取一下，就能把新建的函数的调用数给设置为0。
+//
+// 这些指标可以在faas\gateway\metrics\metrics.go找到
+//
 // Collect collects data to be consumed by prometheus
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
+	e.metricOptions.ServiceReplicasGauge.Collect(ch)
+	
 	e.metricOptions.GatewayFunctionInvocation.Collect(ch)
 	e.metricOptions.GatewayFunctionsHistogram.Collect(ch)
 
@@ -71,6 +82,9 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		e.metricOptions.ServiceReplicasGauge.
 			WithLabelValues(serviceName).
 			Set(float64(service.Replicas))
+
+		// 添加下面这句 获取一下函数的调用数 如果没有的话 会自动设置为 0
+		e.metricOptions.GatewayFunctionInvocation.GetMetricWithLabelValues(serviceName, "200")
 	}
 
 	e.metricOptions.ServiceReplicasGauge.Collect(ch)
