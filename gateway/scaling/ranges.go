@@ -11,7 +11,8 @@ import (
 
 const (
 	// DefaultMinReplicas is the minimal amount of replicas for a service.
-	DefaultMinReplicas = 1
+	// DefaultMinReplicas = 1
+	DefaultMinReplicas = 0  // weew12 函数最小默认副本数
 
 	// DefaultMaxReplicas is the amount of replicas a service will auto-scale up to.
 	DefaultMaxReplicas = 5
