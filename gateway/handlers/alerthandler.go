@@ -3,6 +3,8 @@
 
 // Copyright (c) Alex Ellis 2017. All rights reserved.
 
+// weew12 此文件主要处理接受 AlertManager 的告警消息
+
 package handlers
 
 import (
@@ -74,16 +76,27 @@ func handleAlerts(req requests.PrometheusAlert, service scaling.ServiceQuery, de
 	return errors
 }
 
+// weew12 处理具体的扩缩容操作
 func scaleService(alert requests.PrometheusInnerAlert, service scaling.ServiceQuery, defaultNamespace string) error {
 	var err error
 
 	serviceName, namespace := middleware.GetNamespace(defaultNamespace, alert.Labels.FunctionName)
 
 	if len(serviceName) > 0 {
+		// 获取现在的副本数
 		queryResponse, getErr := service.GetReplicas(serviceName, namespace)
 		if getErr == nil {
 			status := alert.Status
 
+			// 添加判断逻辑 如果告警名字是 APINoInvocation 相当于长时间没有被调用 直接缩容到 0
+			//
+			// 这个resolved状态是Alertmanager发送的告警是否解决的标志，源码里通过判断告警是否解决来决定是否增加还是灭掉多余的函数容器，
+			// 所以这样设置就是假定告警解决了，让它直接恢复最低函数数量
+			if alert.Labels.AlertName == "APINoInvocation" {
+				status = "resolved"
+			}
+
+			// 计算新的副本数
 			newReplicas := CalculateReplicas(status, queryResponse.Replicas, uint64(queryResponse.MaxReplicas), queryResponse.MinReplicas, queryResponse.ScalingFactor)
 
 			log.Printf("[Scale] function=%s %d => %d.\n", serviceName, queryResponse.Replicas, newReplicas)
