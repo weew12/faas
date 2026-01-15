@@ -15,7 +15,8 @@ const (
 	DefaultMinReplicas = 0  // weew12 函数最小默认副本数
 
 	// DefaultMaxReplicas is the amount of replicas a service will auto-scale up to.
-	DefaultMaxReplicas = 5
+	// DefaultMaxReplicas = 5
+	DefaultMaxReplicas = 50 // 修改最大支持的函数副本上限个数
 
 	// DefaultScalingFactor is the defining proportion for the scaling increments.
 	DefaultScalingFactor = 10
@@ -57,7 +58,8 @@ func MakeHorizontalScalingHandler(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		if scaleRequest.Replicas < 1 {
-			scaleRequest.Replicas = 1
+			// scaleRequest.Replicas = 1
+			scaleRequest.Replicas = 0 // 原本逻辑强制限制了最小副本为 1 改为 0
 		}
 
 		if scaleRequest.Replicas > DefaultMaxReplicas {
